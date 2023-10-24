@@ -1,10 +1,10 @@
 # EzTemplate
 
-ez_template is a template engine intended for use by end users. You can create a template with variables. It parses a base template only once and renders multiple times with each set of context variables.
+EzTemplate is a template engine intended for use by end users. You can create a template with variables. It parses a base template only once and renders multiple times with each set of context variables.
 
 ## Usage
 
-### Named variables
+### Normal variables
 
 ```ruby
 class SampleTemplate < EzTemplate::Base
@@ -13,8 +13,8 @@ class SampleTemplate < EzTemplate::Base
   end
 end
 
-tmpl = SampleTemplate.parse(str)
-p tmpl.render(user: current_user)
+renderer = SampleTemplate.parse(str)
+p renderer.render(user: current_user)
 ```
 
 ### Regex variables
@@ -29,8 +29,8 @@ class SampleTemplate < EzTemplate::Base
   end
 end
 
-tmpl = SampleTemplate.parse(str)
-tmpl.render(path: current_path)
+renderer = SampleTemplate.parse(str)
+renderer.render(path: current_path)
 ```
 
 ## Contributing
