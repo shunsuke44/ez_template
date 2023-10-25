@@ -22,6 +22,8 @@ module EzTemplate
   end
 
   class InvalidCharInTagError < ParseError
+    attr_reader :char
+
     def initialize(msg = "Invalid character in tag", line: nil, col: nil, char: nil)
       @char = char
       super(msg, line: line, col: col)
