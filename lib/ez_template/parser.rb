@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "strscan"
+
 module EzTemplate
   # ParseError represents an error on parse.
   #
