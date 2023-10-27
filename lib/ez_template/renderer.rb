@@ -3,9 +3,16 @@
 module EzTemplate
   # Renderer renders parsed template.
   class Renderer
-    def initialize(template, tags, def_list)
+    attr_reader :parse_errors
+
+    def initialize(template, tags, errors, def_list)
       @template = template
       @tags = tags
+      @parse_errors = if errors.nil?
+                        []
+                      else
+                        errors
+                      end
       @definition_list = def_list
     end
 
@@ -24,6 +31,10 @@ module EzTemplate
       str << @template[cur..]
 
       str
+    end
+
+    def errors
+      parse_errors
     end
   end
 end

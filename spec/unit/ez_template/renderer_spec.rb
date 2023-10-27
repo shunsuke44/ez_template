@@ -36,7 +36,7 @@ module EzTemplate
 
     context "with Alice" do
       it "renders the template with the definition list" do
-        renderer = Renderer.new(template, tags, def_list)
+        renderer = Renderer.new(template, tags, nil, def_list)
 
         result = renderer.render({ user: "Alice" })
 
@@ -49,7 +49,7 @@ module EzTemplate
 
     context "with Bob" do
       it "renders the template with the definition list" do
-        renderer = Renderer.new(template, tags, def_list)
+        renderer = Renderer.new(template, tags, nil, def_list)
 
         result = renderer.render({ user: "Bob" })
 

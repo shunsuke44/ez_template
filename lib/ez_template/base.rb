@@ -5,8 +5,8 @@ require "forwardable"
 module EzTemplate
   class Base
     def parse(template, opts = {})
-      tags = Parser.new(opts).parse(template)
-      Renderer.new(template, tags, self.class.definition_list)
+      tags, errors = Parser.new(opts).parse(template)
+      Renderer.new(template, tags, errors, self.class.definition_list)
     end
 
     class << self

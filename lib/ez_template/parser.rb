@@ -58,7 +58,7 @@ module EzTemplate
         @pos_offset += line.size
       end
 
-      @tags
+      [@tags, @errors]
     end
 
     def self.parse(str)
