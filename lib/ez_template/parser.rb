@@ -38,7 +38,6 @@ module EzTemplate
   #             When `:ignore`, Parser ignores the error and continues parsing.
   #             default to `:ignore`.
   class Parser
-    VARIABLE_REGEX = /\{\{ ?(?<str>[^\s{}]+) ?\}\}/.freeze
     attr_reader :tags, :errors
 
     def initialize(opts = {})
@@ -90,7 +89,7 @@ module EzTemplate
 
     def inner_tag(scanner, first)
       scanner.scan(/\s+/)
-      tag_str = scanner.scan(/[\w:-]+/)
+      tag_str = scanner.scan(/[[:print:]&&[^\s{}]]+/)
       if tag_str.nil?
         raise InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0]) if fail_fast?
 
