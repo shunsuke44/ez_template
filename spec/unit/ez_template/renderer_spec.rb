@@ -123,5 +123,35 @@ module EzTemplate
         end
       end
     end
+
+    describe "#render with html_escape" do
+      context "when a value contains html special characters" do
+        it "escapes the special characters" do
+          str = <<~STR
+            {{ greeting }}, {{ username }}
+          STR
+
+          tags = [Tag.new("greeting", 0, 14), Tag.new("username", 16, 30)]
+
+          def_list = DefinitionList.new
+          def_list << Variable.new("greeting", proc { |greeting| greeting })
+          def_list << Variable.new("username", proc { |user| user.name })
+
+          renderer = Renderer.new(str, tags, nil, def_list)
+
+          user_class = Struct.new(:name)
+          context = {
+            "greeting": "<script type=\"text/javascript\">alert(1)</script>",
+            "user": user_class.new(name: "<b>foobar</b>")
+          }
+
+          result = renderer.render(context, opts: { html_escape: true })
+
+          expect(result).to eq(<<~WANT)
+            &lt;script type=&quot;text/javascript&quot;&gt;alert(1)&lt;/script&gt;, &lt;b&gt;foobar&lt;/b&gt;
+          WANT
+        end
+      end
+    end
   end
 end

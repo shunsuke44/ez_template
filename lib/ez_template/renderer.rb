@@ -53,12 +53,21 @@ module EzTemplate
           end
         end
 
-        str << var.value(tag.str, context)
+        str << if html_escape?(opts)
+                 CGI.escapeHTML(var.value(tag.str, context))
+               else
+                 var.value(tag.str, context)
+               end
         cur = tag.last
       end
       str << @template[cur..]
 
       str
+    end
+
+    def render_html(context, opts: {})
+      opts[:html_escape] = true
+      render(context, opts: opts)
     end
 
     def errors
