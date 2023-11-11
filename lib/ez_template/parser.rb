@@ -91,16 +91,21 @@ module EzTemplate
       scanner.scan(/\s+/)
       tag_str = scanner.scan(/[[:print:]&&[^\s{}]]+/)
       if tag_str.nil?
-        raise InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0]) if fail_fast?
+        if fail_fast?
+          raise InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0])
+        end
 
-        @errors << InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0])
+        @errors << InvalidCharInTagError.new(line: @linenum, col: scanner.pos,
+                                             char: scanner.rest[0])
         return true
       end
 
       closing_tag = scanner.scan(/\s*}}/)
 
       if closing_tag.nil?
-        raise InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0]) if fail_fast?
+        if fail_fast?
+          raise InvalidCharInTagError.new(line: @linenum, col: scanner.pos, char: scanner.rest[0])
+        end
 
         @errors << InvalidCharInTagError.new(
           line: @linenum, col: scanner.pos, char: scanner.rest[0]

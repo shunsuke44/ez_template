@@ -3,60 +3,154 @@
 require "spec_helper"
 
 module EzTemplate
-  RSpec.describe Renderer do
-    let :template do
-      <<~TEMPLATE
-        There is a {{ animal }} in the {{ place }}.
-        It is {{ behavior }} with {{ tool }}.
-      TEMPLATE
-    end
+  RSpec.shared_examples "normal rendering scenario" do
+    context "when a variable definition matches the tag name" do
+      it "renders a template with a context" do
+        str = <<~STR
+          There is a {{ animal }}.
+        STR
 
-    let :tags do
-      [
-        Tag.new("animal", 11, 23),
-        Tag.new("place", 31, 42), # 44
-        Tag.new("behavior", 50, 64),
-        Tag.new("tool", 70, 80)
-      ]
-    end
+        tags = [
+          Tag.new("animal", 11, 23)
+        ]
 
-    let :def_list do
-      def_list = DefinitionList.new
-      def_list << Variable.new("animal", proc { "dog" })
-      def_list << Variable.new("place", proc { "garden" })
-      def_list << RegexVariable.new(/behavior/, proc { "playing" })
-      def_list << RegexVariable.new(/tool/, proc do |_md, user|
-        case user
-        when "Alice" then "a ball"
-        when "Bob" then "a bottle"
-        end
-      end)
-      def_list
-    end
+        def_list = DefinitionList.new
+        def_list << Variable.new("animal", proc { |animal| animal })
 
-    context "with Alice" do
-      it "renders the template with the definition list" do
-        renderer = Renderer.new(template, tags, nil, def_list)
-
-        result = renderer.render({ user: "Alice" })
-
+        renderer = Renderer.new(str, tags, nil, def_list)
+        result = renderer.render({ animal: :dog }, opts: opts)
         expect(result).to eq(<<~WANT)
-          There is a dog in the garden.
-          It is playing with a ball.
+          There is a dog.
         WANT
       end
     end
+  end
 
-    context "with Bob" do
-      it "renders the template with the definition list" do
-        renderer = Renderer.new(template, tags, nil, def_list)
+  RSpec.shared_examples "rendering with `:ignore` on undefined" do
+    context "when a tag name does not match any variable" do
+      it "renders the tag as is" do
+        str = <<~STR
+          {{ hoge }}
+        STR
 
-        result = renderer.render({ user: "Bob" })
+        tags = [Tag.new("hoge", 0, 10)]
 
-        expect(result).to eq(<<~WANT)
-          There is a dog in the garden.
-          It is playing with a bottle.
-        WANT
+        def_list = DefinitionList.new
+        def_list << Variable.new("huga", proc { "foobar" })
+
+        renderer = Renderer.new(str, tags, nil, def_list)
+
+        result = renderer.render({ "hoge": "huga" }, opts: opts)
+
+        expect(result).to eq("{{ hoge }}\n")
+      end
+    end
+  end
+
+  RSpec.describe Renderer do
+    describe "#render without option" do
+      let :opts do
+        {}
+      end
+
+      include_examples "normal rendering scenario"
+
+      include_examples "rendering with `:ignore` on undefined"
+    end
+
+    describe "#render with `:ignore` on undefined" do
+      let :opts do
+        { on_undefined: :ignore }
+      end
+
+      include_examples "normal rendering scenario"
+
+      include_examples "rendering with `:ignore` on undefined"
+    end
+
+    describe "#render with `:fail_fast` on undefined" do
+      let :opts do
+        { on_undefined: :fail_fast }
+      end
+
+      include_examples "normal rendering scenario"
+
+      context "when a tag name does not match any variable" do
+        it "raises error" do
+          str = <<~STR
+            {{ hoge }}
+          STR
+
+          tags = [Tag.new("hoge", 0, 10)]
+
+          def_list = DefinitionList.new
+          def_list << Variable.new("huga", proc { "foobar" })
+
+          renderer = Renderer.new(str, tags, nil, def_list)
+
+          begin
+            renderer.render({ "hoge": "huga" }, opts: opts)
+          rescue UndefinedVariable => e
+            expect(e.str).to eq("hoge")
+          end
+        end
+      end
+    end
+
+    describe "#render with `:cut_off` on undefined" do
+      let :opts do
+        { on_undefined: :cut_off }
+      end
+
+      include_examples "normal rendering scenario"
+
+      context "when a tag name does not match any variable" do
+        it "raises error" do
+          str = <<~STR
+            {{ hoge }}
+          STR
+
+          tags = [Tag.new("hoge", 0, 10)]
+
+          def_list = DefinitionList.new
+          def_list << Variable.new("huga", proc { "foobar" })
+
+          renderer = Renderer.new(str, tags, nil, def_list)
+
+          result = renderer.render({ "hoge": "huga" }, opts: opts)
+
+          expect(result).to eq("\n")
+        end
+      end
+    end
+
+    describe "#render with html_escape" do
+      context "when a value contains html special characters" do
+        it "escapes the special characters" do
+          str = <<~STR
+            {{ greeting }}, {{ username }}
+          STR
+
+          tags = [Tag.new("greeting", 0, 14), Tag.new("username", 16, 30)]
+
+          def_list = DefinitionList.new
+          def_list << Variable.new("greeting", proc { |greeting| greeting })
+          def_list << Variable.new("username", proc { |user| user.name })
+
+          renderer = Renderer.new(str, tags, nil, def_list)
+
+          user_class = Struct.new(:name)
+          context = {
+            "greeting": "<script type=\"text/javascript\">alert(1)</script>",
+            "user": user_class.new(name: "<b>foobar</b>")
+          }
+
+          result = renderer.render(context, opts: { html_escape: true })
+
+          expect(result).to eq(<<~WANT)
+            &lt;script type=&quot;text/javascript&quot;&gt;alert(1)&lt;/script&gt;, &lt;b&gt;foobar&lt;/b&gt;
+          WANT
+        end
       end
     end
   end
