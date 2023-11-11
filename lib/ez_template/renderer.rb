@@ -1,11 +1,28 @@
 # frozen_string_literal: true
 
 module EzTemplate
+  class UndefinedVariable < StandardError
+    attr_reader :str
+
+    def initialize(str:)
+      @str = str
+      super("undefined variable: #{str}")
+    end
+  end
+
   # Renderer renders parsed template.
+  # Available options are:
+  #   on_undefined: When `:fail_fast`, Renderer raises UndefinedVariable error.
+  #                 When `:ignore`, Renderer renders the tag as it is.
+  #                 When `:cut_off`, Renderer replaces the tag with blank.
+  #                 default to `:ignore`
+  #   html_escape:  When true, Renderer escapes each value returned by variable definition.
+  #                 When false, it doesn't.
   class Renderer
+    ON_UNDEFINED_OPTS = %i[fail_fast ignore cut_off].freeze
     attr_reader :parse_errors
 
-    def initialize(template, tags, errors, def_list)
+    def initialize(template, tags, errors, def_list, opts: {})
       @template = template
       @tags = tags
       @parse_errors = if errors.nil?
@@ -14,16 +31,27 @@ module EzTemplate
                         errors
                       end
       @definition_list = def_list
+      @opts = opts
     end
 
-    def render(context)
+    def render(context, opts: {})
       str = String.new
       cur = 0
 
       @tags.each do |tag|
         str << @template[cur...tag.first]
         var = tag.variable(@definition_list)
-        raise "Invalid Tag : #{tag.str}" if var.nil?
+        if var.nil?
+          case on_undefined(opts)
+          when :fail_fast
+            raise UndefinedVariable.new(str: tag.str)
+          when :cut_off
+            cur = tag.last
+            next
+          else
+            next
+          end
+        end
 
         str << var.value(tag.str, context)
         cur = tag.last
@@ -35,6 +63,26 @@ module EzTemplate
 
     def errors
       parse_errors
+    end
+
+    def render_opts=(opts)
+      @opts = opts
+    end
+
+    def html_escape?(opts)
+      return opts[:html_escape] unless opts[:html_escape].nil?
+
+      @opts[:html_escape]
+    end
+
+    def on_undefined(opts)
+      on_undefined = opts[:on_undefined]&.to_sym
+      return on_undefined if ON_UNDEFINED_OPTS.include? on_undefined
+
+      on_undefined = @opts[:on_undefined]&.to_sym
+      return on_undefined if ON_UNDEFINED_OPTS.include? on_undefined
+
+      :ignore
     end
   end
 end
