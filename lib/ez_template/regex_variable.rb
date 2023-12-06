@@ -10,7 +10,7 @@ module EzTemplate
 
     def_delegators :@regex, :match, :match?
 
-    def initialize(regex, block)
+    def initialize(regex, &block)
       raise "Block should not be nil" if block.nil?
 
       @regex = regex

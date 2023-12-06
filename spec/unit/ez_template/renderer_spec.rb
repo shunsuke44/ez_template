@@ -15,7 +15,7 @@ module EzTemplate
         ]
 
         def_list = DefinitionList.new
-        def_list << Variable.new("animal", proc { |animal| animal })
+        def_list << Variable.new("animal") { |animal| animal }
 
         renderer = Renderer.new(str, tags, nil, def_list)
         result = renderer.render({ animal: :dog }, opts: opts)
@@ -36,7 +36,7 @@ module EzTemplate
         tags = [Tag.new("hoge", 0, 10)]
 
         def_list = DefinitionList.new
-        def_list << Variable.new("huga", proc { "foobar" })
+        def_list << Variable.new("huga") { "foobar" }
 
         renderer = Renderer.new(str, tags, nil, def_list)
 
@@ -84,7 +84,7 @@ module EzTemplate
           tags = [Tag.new("hoge", 0, 10)]
 
           def_list = DefinitionList.new
-          def_list << Variable.new("huga", proc { "foobar" })
+          def_list << Variable.new("huga") { "foobar" }
 
           renderer = Renderer.new(str, tags, nil, def_list)
 
@@ -113,7 +113,7 @@ module EzTemplate
           tags = [Tag.new("hoge", 0, 10)]
 
           def_list = DefinitionList.new
-          def_list << Variable.new("huga", proc { "foobar" })
+          def_list << Variable.new("huga") { "foobar" }
 
           renderer = Renderer.new(str, tags, nil, def_list)
 
@@ -134,8 +134,11 @@ module EzTemplate
           tags = [Tag.new("greeting", 0, 14), Tag.new("username", 16, 30)]
 
           def_list = DefinitionList.new
-          def_list << Variable.new("greeting", proc { |greeting| greeting })
-          def_list << Variable.new("username", proc { |user| user.name })
+          def_list << Variable.new("greeting") { |greeting| greeting }
+
+          # rubocop:disable Style/SymbolProc
+          def_list << Variable.new("username") { |user| user.name }
+          # rubocop:enable Style/SymbolProc
 
           renderer = Renderer.new(str, tags, nil, def_list)
 

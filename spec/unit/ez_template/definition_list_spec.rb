@@ -10,12 +10,12 @@ module EzTemplate
       end
 
       before do
-        definition_list << Variable.new("animal", proc { "dog" })
-        definition_list << Variable.new("hoge", proc { "huga" })
+        definition_list << Variable.new("animal") { "dog" }
+        definition_list << Variable.new("hoge") { "huga" }
 
-        definition_list << RegexVariable.new(/ani.../, proc { "cat" })
-        definition_list << RegexVariable.new(/foo/, proc { "bar" })
-        definition_list << RegexVariable.new(/foobar/, proc { "hugahuga" })
+        definition_list << RegexVariable.new(/ani.../) { "cat" }
+        definition_list << RegexVariable.new(/foo/) { "bar" }
+        definition_list << RegexVariable.new(/foobar/) { "hugahuga" }
       end
 
       context "when it matches variable and regex variable" do

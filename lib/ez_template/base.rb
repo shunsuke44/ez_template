@@ -25,9 +25,9 @@ module EzTemplate
         if name.is_a? Regexp
           raise "block is required for regex variable" if block.nil?
 
-          definition_list << RegexVariable.new(name, block)
+          definition_list << RegexVariable.new(name, &block)
         else
-          definition_list << Variable.new(name, block)
+          definition_list << Variable.new(name, &block)
         end
       end
 
