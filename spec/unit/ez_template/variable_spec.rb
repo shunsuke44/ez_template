@@ -5,7 +5,7 @@ module EzTemplate
     describe "#required_params" do
       context "with block" do
         let :variable do
-          block = proc { |user, animal|
+          Variable.new(:hoge) do |user, animal|
             if user == "alice"
               case animal
               when :dog
@@ -16,9 +16,7 @@ module EzTemplate
             else
               "bob"
             end
-          }
-
-          Variable.new(:hoge, block)
+          end
         end
 
         it "returns parameters required to construct the variable" do
@@ -40,7 +38,7 @@ module EzTemplate
     describe "#value" do
       context "with block" do
         let :variable do
-          block = proc { |user, animal|
+          Variable.new(:hoge) do |user, animal|
             if user == :alice
               case animal
               when :dog
@@ -51,9 +49,7 @@ module EzTemplate
             else
               "bob"
             end
-          }
-
-          Variable.new(:hoge, block)
+          end
         end
 
         it "calls variable definition block and returns value" do
@@ -79,13 +75,12 @@ module EzTemplate
 
       context "with no matching context value" do
         let :variable do
-          block = proc { |animal|
+          Variable.new(:hoge) do |animal|
             case animal
             when nil
               "nil value"
             end
-          }
-          Variable.new(:hoge, block)
+          end
         end
 
         it "passes nil to the variable callback" do

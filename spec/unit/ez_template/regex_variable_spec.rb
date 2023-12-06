@@ -7,11 +7,9 @@ module EzTemplate
     describe "#value" do
       context "with a parameter" do
         let :regex_variable do
-          b = proc { |match_data, animal|
+          RegexVariable.new(/Alice/) do |match_data, animal|
             "#{match_data[0]}'s #{animal}"
-          }
-
-          RegexVariable.new(/Alice/, b)
+          end
         end
 
         context "when a whole str matches regex" do
@@ -37,9 +35,9 @@ module EzTemplate
 
       context "without a parameter" do
         let :regex_variable do
-          b = proc { "https://example.com" }
-
-          RegexVariable.new(%r{\Ahttps://google.com\Z}, b)
+          RegexVariable.new(%r{\Ahttps://google.com\Z}) do |_|
+            "https://example.com"
+          end
         end
 
         it "calls the variable definition without match data and returns a value" do
@@ -56,10 +54,9 @@ module EzTemplate
     describe "#required_params" do
       context "with parameters" do
         let :regex_variable do
-          b = proc { |md, foo, bar|
+          RegexVariable.new(/\ABob\Z/) do |md, foo, bar|
             "#{md[0]} #{foo} #{bar}"
-          }
-          RegexVariable.new(/\ABob\Z/, b)
+          end
         end
 
         it "returns required parameters except for match data" do
@@ -71,8 +68,8 @@ module EzTemplate
 
       context "without parameters" do
         let :regex_variable do
-          b = proc {}
-          RegexVariable.new(/\ABob\Z/, b)
+          RegexVariable.new(/\ABob\Z/) do
+          end
         end
 
         it "returns empty array" do
@@ -82,10 +79,9 @@ module EzTemplate
 
       context "with only one match data parameter" do
         let :regex_variable do
-          b = proc { |md|
+          RegexVariable.new(/\Afoo\Z/) do |md|
             md[0]
-          }
-          RegexVariable.new(/\Afoo\Z/, b)
+          end
         end
 
         it "returns empty array" do
