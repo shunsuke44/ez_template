@@ -156,5 +156,44 @@ module EzTemplate
         end
       end
     end
+
+    describe "#append_variable" do
+      it "appends variable" do
+        str = <<~STR
+          {{hoge}}
+        STR
+
+        tags = [Tag.new("hoge", 0, 8)]
+
+        def_list = DefinitionList.new
+
+        renderer = Renderer.new(str, tags, nil, def_list)
+
+        renderer.append_variables(Variable.new("hoge") do
+          "foobar"
+        end)
+
+        expect(renderer.render(nil)).to eq("foobar\n")
+      end
+
+      it "preserves original def_list" do
+        str = <<~STR
+          {{hoge}}
+        STR
+
+        tags = [Tag.new("hoge", 0, 8)]
+
+        def_list = DefinitionList.new
+
+        renderer = Renderer.new(str, tags, nil, def_list)
+
+        renderer.append_variables(Variable.new("hoge") do
+          "foobar"
+        end)
+
+        expect(def_list.variables.length).to eq(0)
+        expect(def_list.regex_variables.length).to eq(0)
+      end
+    end
   end
 end

@@ -30,6 +30,7 @@ module EzTemplate
                       else
                         errors
                       end
+      @is_original_definition_list = true
       @definition_list = def_list
       @opts = opts
     end
@@ -77,6 +78,20 @@ module EzTemplate
     def render_opts=(opts)
       @opts = opts
     end
+
+    def append_variables(*args)
+      # Copy DefinitionList on write
+      if @is_original_definition_list
+        @is_original_definition_list = false
+        @definition_list = @definition_list.clone
+      end
+
+      args.each do |var|
+        @definition_list << var
+      end
+    end
+
+    private
 
     def html_escape?(opts)
       return opts[:html_escape] unless opts[:html_escape].nil?

@@ -3,9 +3,9 @@
 module EzTemplate
   # DefinitionList represents a list of defined template variables.
   class DefinitionList
-    def initialize
-      @vars = {}
-      @regex_vars = []
+    def initialize(vars: {}, regex_vars: [])
+      @vars = vars
+      @regex_vars = regex_vars
     end
 
     def get(var_str)
@@ -40,6 +40,13 @@ module EzTemplate
 
     def regex_variables
       @regex_vars.clone
+    end
+
+    def clone
+      new_vars = @vars.clone
+      new_regex_vars = @regex_vars.clone
+
+      DefinitionList.new(vars: new_vars, regex_vars: new_regex_vars)
     end
 
     private
