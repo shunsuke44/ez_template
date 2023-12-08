@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "cgi"
+
 module EzTemplate
   class UndefinedVariable < StandardError
     attr_reader :str
@@ -20,7 +22,7 @@ module EzTemplate
   #                 When false, it doesn't.
   class Renderer
     ON_UNDEFINED_OPTS = %i[fail_fast ignore cut_off].freeze
-    attr_reader :parse_errors
+    attr_reader :parse_errors, :tags
 
     def initialize(template, tags, errors, def_list, opts: {})
       @template = template
