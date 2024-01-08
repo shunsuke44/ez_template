@@ -2,45 +2,12 @@
 
 module EzTemplate
   RSpec.describe Variable do
-    describe "#required_params" do
-      context "with block" do
-        let :variable do
-          Variable.new(:hoge) do |user, animal|
-            if user == "alice"
-              case animal
-              when :dog
-                "dog"
-              when :cat
-                "cat"
-              end
-            else
-              "bob"
-            end
-          end
-        end
-
-        it "returns parameters required to construct the variable" do
-          expect(variable.required_params).to include :user, :animal
-        end
-      end
-
-      context "without block" do
-        let :variable do
-          Variable.new(:hoge)
-        end
-
-        it "returns variable name directly" do
-          expect(variable.required_params).to include :hoge
-        end
-      end
-    end
-
     describe "#value" do
       context "with block" do
         let :variable do
-          Variable.new(:hoge) do |user, animal|
-            if user == :alice
-              case animal
+          Variable.new(:hoge) do
+            if params[:user] == :alice
+              case params[:animal]
               when :dog
                 "dog"
               when :cat
@@ -53,8 +20,8 @@ module EzTemplate
         end
 
         it "calls variable definition block and returns value" do
-          context = { user: :alice, animal: :dog }
-          result = variable.value("hoge", context)
+          params = { user: :alice, animal: :dog }
+          result = variable.value("hoge", params)
 
           expect(result).to eq("dog")
         end
@@ -66,17 +33,17 @@ module EzTemplate
         end
 
         it "returns context value directly" do
-          context = { hoge: "huga" }
+          params = { hoge: "huga" }
 
-          result = variable.value("hoge", context)
+          result = variable.value("hoge", params)
           expect(result).to eq("huga")
         end
       end
 
       context "with no matching context value" do
         let :variable do
-          Variable.new(:hoge) do |animal|
-            case animal
+          Variable.new(:hoge) do
+            case params[:animal]
             when nil
               "nil value"
             end
@@ -84,9 +51,9 @@ module EzTemplate
         end
 
         it "passes nil to the variable callback" do
-          context = {}
+          params = {}
 
-          expect(variable.value("hoge", context)).to eq("nil value")
+          expect(variable.value("hoge", params)).to eq("nil value")
         end
       end
     end

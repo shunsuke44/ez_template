@@ -4,15 +4,20 @@ require "spec_helper"
 
 module TestIntegration
   class SampleTemplate < EzTemplate::Base
-    variable :animal
-    variable :place
-    variable(/action/) do |_md, animal|
-      case animal.to_sym
+    variable :animal do
+      case params[:animal].to_sym
       when :dog
-        "running"
+        "a young dog"
       when :cat
-        "smiling"
+        "an old cat"
       end
+    end
+
+    variable :place
+
+    variable(%r{https?://\w+\.com[/.\w]*$}) do |md|
+      uri = URI.parse(md[0])
+      "#{uri.scheme}://#{uri.host}/index.html"
     end
   end
 end
@@ -22,8 +27,9 @@ module EzTemplate
     describe "#render" do
       let(:str) do
         <<~TEMPLATE
-          There is a {{ animal }} in the {{ place }}.
-          It is {{ action }}.
+          There is {{ animal }} in the {{ place }}.
+
+          Please visit {{ https://example.com/hogehuga/foobar.html }}
         TEMPLATE
       end
 
@@ -36,8 +42,9 @@ module EzTemplate
         result = r.render({ animal: "dog", place: "garden" })
 
         expect(result).to eq(<<~EXPECT)
-          There is a dog in the garden.
-          It is running.
+          There is a young dog in the garden.
+
+          Please visit https://example.com/index.html
         EXPECT
       end
     end
@@ -45,8 +52,9 @@ module EzTemplate
     describe ".render" do
       let :str do
         <<~TEMPLATE
-          There is a {{ animal }} in the {{ place }}.
-          It is {{ action }}.
+          There is {{ animal }} in the {{ place }}.
+
+          Please visit {{ http://foo.com/hogehuga/bar.html }}
         TEMPLATE
       end
 
@@ -56,11 +64,12 @@ module EzTemplate
 
       it "renders template with predefined variables" do
         r = template_class.parse(str)
-        result = r.render({ animal: "dog", place: "garden" })
+        result = r.render({ animal: "cat", place: "garden" })
 
         expect(result).to eq(<<~EXPECT)
-          There is a dog in the garden.
-          It is running.
+          There is an old cat in the garden.
+
+          Please visit http://foo.com/index.html
         EXPECT
       end
     end

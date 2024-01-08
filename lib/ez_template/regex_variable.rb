@@ -17,37 +17,10 @@ module EzTemplate
       @block = block
     end
 
-    def value(str, context)
+    def value(str, params)
       match_data = @regex.match(str)
 
-      args, kwargs = build_args(match_data, context)
-      @block.call(*args, **kwargs).to_s
-    end
-
-    def required_params
-      p = @block.parameters[1..]&.map { |v| v[1] }
-      p.nil? ? [] : p
-    end
-
-    private
-
-    def build_args(match_data, context)
-      parameters = @block.parameters
-      return [], {} if parameters.empty?
-
-      args = [match_data]
-      kwargs = {}
-      @block.parameters[1..].each do |param|
-        type = param[0]
-        name = param[1]
-        case type
-        when :req, :opt
-          args << context[name]
-        when :keyreq, :key
-          kwargs[name] = context[name]
-        end
-      end
-      [args, kwargs]
+      CleanRoom.new(params).instance_exec(match_data, &@block).to_s
     end
   end
 end
