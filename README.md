@@ -14,7 +14,7 @@ class SampleTemplate < EzTemplate::Base
 end
 
 renderer = SampleTemplate.parse(str)
-p renderer.render(user: current_user)
+puts renderer.render(user: current_user)
 ```
 
 ### Regex variables
@@ -30,7 +30,20 @@ class SampleTemplate < EzTemplate::Base
 end
 
 renderer = SampleTemplate.parse(str)
-renderer.render(path: current_path)
+puts renderer.render(path: current_path)
+```
+
+### Append variables after parsing
+
+```ruby
+class SampleTemplate < EzTemplate::Base
+end
+
+renderer = SampleTemplate.parse(str)
+renderer.append(EzTemplate::Variable("foo") |hoge|
+  "bar"
+end)
+puts renderer.render(user: current_user)
 ```
 
 ## Contributing
