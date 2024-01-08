@@ -8,14 +8,15 @@ EzTemplate is a template engine intended for use by end users. You can create a 
 
 ```ruby
 class SampleTemplate < EzTemplate::Base
-  variable :current_username do |user|
-    user.name
+  variable :current_username do
+    params[:user].name
   end
 end
 
 renderer = SampleTemplate.parse(str)
-puts renderer.render(user: current_user)
+puts renderer.render({ user: current_user })
 ```
+You can access the context parameters through the `params` method inside a definition block of a variable.
 
 ### Regex variables
 
@@ -23,14 +24,14 @@ puts renderer.render(user: current_user)
 require 'uri'
 
 class SampleTemplate < EzTemplate::Base
-  variable %r{\Ahttps://.*\Z} do |match_data, path|
+  variable %r{\Ahttps://.*\Z} do |match_data|
     uri = URI.parse(match_data[0])
-    "#{uri.scheme}://#{uri.host}/#{path}"
+    "#{uri.scheme}://#{uri.host}/#{params[:path]}"
   end
 end
 
 renderer = SampleTemplate.parse(str)
-puts renderer.render(path: current_path)
+puts renderer.render({ path: current_path })
 ```
 
 ### Append variables after parsing
@@ -40,10 +41,11 @@ class SampleTemplate < EzTemplate::Base
 end
 
 renderer = SampleTemplate.parse(str)
-renderer.append(EzTemplate::Variable("foo") |hoge|
-  "bar"
+renderer.append(EzTemplate::Variable("foo") do
+  params[:bar]
 end)
-puts renderer.render(user: current_user)
+
+puts renderer.render({ bar: "baz" })
 ```
 
 ## Contributing

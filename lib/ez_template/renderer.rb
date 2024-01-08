@@ -37,7 +37,7 @@ module EzTemplate
       @opts = opts
     end
 
-    def render(context, opts: {})
+    def render(params, opts: {})
       str = String.new
       cur = 0
 
@@ -57,9 +57,9 @@ module EzTemplate
         end
 
         str << if html_escape?(opts)
-                 CGI.escapeHTML(var.value(tag.str, context))
+                 CGI.escapeHTML(var.value(tag.str, params))
                else
-                 var.value(tag.str, context)
+                 var.value(tag.str, params)
                end
         cur = tag.last
       end
@@ -68,9 +68,9 @@ module EzTemplate
       str
     end
 
-    def render_html(context, opts: {})
+    def render_html(params, opts: {})
       opts[:html_escape] = true
-      render(context, opts: opts)
+      render(params, opts: opts)
     end
 
     def errors

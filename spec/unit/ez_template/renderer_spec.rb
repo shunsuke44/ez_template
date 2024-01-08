@@ -15,7 +15,7 @@ module EzTemplate
         ]
 
         def_list = DefinitionList.new
-        def_list << Variable.new("animal") { |animal| animal }
+        def_list << Variable.new("animal") { params[:animal] }
 
         renderer = Renderer.new(str, tags, nil, def_list)
         result = renderer.render({ animal: :dog }, opts: opts)
@@ -134,21 +134,19 @@ module EzTemplate
           tags = [Tag.new("greeting", 0, 14), Tag.new("username", 16, 30)]
 
           def_list = DefinitionList.new
-          def_list << Variable.new("greeting") { |greeting| greeting }
+          def_list << Variable.new("greeting") { params[:greeting] }
 
-          # rubocop:disable Style/SymbolProc
-          def_list << Variable.new("username") { |user| user.name }
-          # rubocop:enable Style/SymbolProc
+          def_list << Variable.new("username") { params[:user].name }
 
           renderer = Renderer.new(str, tags, nil, def_list)
 
           user_class = Struct.new(:name)
-          context = {
+          params = {
             "greeting": "<script type=\"text/javascript\">alert(1)</script>",
             "user": user_class.new(name: "<b>foobar</b>")
           }
 
-          result = renderer.render(context, opts: { html_escape: true })
+          result = renderer.render(params, opts: { html_escape: true })
 
           expect(result).to eq(<<~WANT)
             &lt;script type=&quot;text/javascript&quot;&gt;alert(1)&lt;/script&gt;, &lt;b&gt;foobar&lt;/b&gt;
