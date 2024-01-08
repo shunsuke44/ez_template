@@ -2,12 +2,10 @@
 
 module EzTemplate
   class CleanRoom
+    attr_reader :params
+
     def initialize(params)
       @params = params
-    end
-
-    def params
-      @params
     end
   end
 end

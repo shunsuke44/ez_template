@@ -136,9 +136,7 @@ module EzTemplate
           def_list = DefinitionList.new
           def_list << Variable.new("greeting") { params[:greeting] }
 
-          # rubocop:disable Style/SymbolProc
           def_list << Variable.new("username") { params[:user].name }
-          # rubocop:enable Style/SymbolProc
 
           renderer = Renderer.new(str, tags, nil, def_list)
 
