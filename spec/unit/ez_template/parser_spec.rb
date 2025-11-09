@@ -37,6 +37,19 @@ module EzTemplate
         expect(errors).to be_empty
       end
     end
+
+    context "when a tag contains non-ASCII characters" do
+      it "parses as a tag correctly" do
+        tags, errors = parser.parse(<<~STR)
+          これは{{ 日本語のタグ }}です。
+        STR
+
+        want = [Tag.new("日本語のタグ", 9, 33)]
+
+        expect(tags).to eq(want)
+        expect(errors).to be_empty
+      end
+    end
   end
 
   RSpec.describe Parser do
