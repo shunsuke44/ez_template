@@ -126,26 +126,36 @@ module EzTemplate
 
       context "when a tag string contains line breaks" do
         it "raise error" do
-          parser.parse(<<~STR)
+          str = <<~STR
             There is a {{ dog_name
             }}
           STR
-        rescue InvalidCharInTagError => e
-          expect(e.line).to eq(1)
-          expect(e.col).to eq(22)
-          expect(e.char).to eq("\n")
+
+          expect {
+            parser.parse(str)
+          }.to raise_error { |error|
+            expect(error).to be_a(InvalidCharInTagError)
+            expect(error.line).to eq(1)
+            expect(error.col).to eq(22)
+            expect(error.char).to eq("\n")
+          }
         end
       end
 
       context "when a tag string contains a space in the middle" do
         it "raise error" do
-          parser.parse(<<~STR)
+          str = <<~STR
             There is a {{ dog name }}.
           STR
-        rescue InvalidCharInTagError => e
-          expect(e.line).to eq(1)
-          expect(e.col).to eq(17)
-          expect(e.char).to eq(" ")
+
+          expect {
+            parser.parse(str)
+          }.to raise_error { |error|
+            expect(error).to be_a(InvalidCharInTagError)
+            expect(error.line).to eq(1)
+            expect(error.col).to eq(17)
+            expect(error.char).to eq(" ")
+          }
         end
       end
     end
