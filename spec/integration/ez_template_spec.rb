@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require "uri"
 
 module EzTemplate
   RSpec.describe EzTemplate do
