@@ -131,14 +131,14 @@ module EzTemplate
             }}
           STR
 
-          expect {
+          expect do
             parser.parse(str)
-          }.to raise_error { |error|
+          end.to(raise_error do |error|
             expect(error).to be_a(InvalidCharInTagError)
             expect(error.line).to eq(1)
             expect(error.col).to eq(22)
             expect(error.char).to eq("\n")
-          }
+          end)
         end
       end
 
@@ -148,14 +148,14 @@ module EzTemplate
             There is a {{ dog name }}.
           STR
 
-          expect {
+          expect do
             parser.parse(str)
-          }.to raise_error { |error|
+          end.to(raise_error do |error|
             expect(error).to be_a(InvalidCharInTagError)
             expect(error.line).to eq(1)
             expect(error.col).to eq(17)
             expect(error.char).to eq(" ")
-          }
+          end)
         end
       end
     end
