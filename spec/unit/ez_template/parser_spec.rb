@@ -37,6 +37,19 @@ module EzTemplate
         expect(errors).to be_empty
       end
     end
+
+    context "when a tag contains non-ASCII characters" do
+      it "parses as a tag correctly" do
+        tags, errors = parser.parse(<<~STR)
+          これは{{ 日本語のタグ }}です。
+        STR
+
+        want = [Tag.new("日本語のタグ", 9, 33)]
+
+        expect(tags).to eq(want)
+        expect(errors).to be_empty
+      end
+    end
   end
 
   RSpec.describe Parser do
@@ -113,26 +126,36 @@ module EzTemplate
 
       context "when a tag string contains line breaks" do
         it "raise error" do
-          parser.parse(<<~STR)
+          str = <<~STR
             There is a {{ dog_name
             }}
           STR
-        rescue InvalidCharInTagError => e
-          expect(e.line).to eq(1)
-          expect(e.col).to eq(22)
-          expect(e.char).to eq("\n")
+
+          expect do
+            parser.parse(str)
+          end.to(raise_error do |error|
+            expect(error).to be_a(InvalidCharInTagError)
+            expect(error.line).to eq(1)
+            expect(error.col).to eq(22)
+            expect(error.char).to eq("\n")
+          end)
         end
       end
 
       context "when a tag string contains a space in the middle" do
         it "raise error" do
-          parser.parse(<<~STR)
+          str = <<~STR
             There is a {{ dog name }}.
           STR
-        rescue InvalidCharInTagError => e
-          expect(e.line).to eq(1)
-          expect(e.col).to eq(17)
-          expect(e.char).to eq(" ")
+
+          expect do
+            parser.parse(str)
+          end.to(raise_error do |error|
+            expect(error).to be_a(InvalidCharInTagError)
+            expect(error.line).to eq(1)
+            expect(error.col).to eq(17)
+            expect(error.char).to eq(" ")
+          end)
         end
       end
     end
